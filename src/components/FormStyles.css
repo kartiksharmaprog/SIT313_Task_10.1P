@@ -1,0 +1,84 @@
+body {
+  font-family: monospace;
+  background: #fff;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+}
+
+.form-box {
+  border: 2px solid #cfe2ff;
+  border-radius: 8px;
+  padding: 32px;
+  width: 350px;
+  background: #f9fafc;
+}
+
+.form-title {
+  font-family: monospace;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 22px;
+}
+
+.brand {
+  color: #222;
+  font-weight: bold;
+}
+
+.blue-title {
+  color: #2076f7;
+  font-family: monospace;
+}
+
+input {
+  width: 100%;
+  margin: 5px 0 18px 0;
+  padding: 9px;
+  border: 1px solid #aed3fe;
+  border-radius: 4px;
+  font-size: 15px;
+}
+
+label {
+  font-weight: bold;
+  margin-bottom: 4px;
+  display: block;
+  font-family: Arial, sans-serif;
+}
+
+.primary-btn {
+  width: 100%;
+  background: #2076f7;
+  color: #fff;
+  font-size: 18px;
+  font-family: monospace;
+  padding: 10px 0;
+  margin-top: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.primary-btn:hover {
+  background: #1354ab;
+}
+
+.link-btn {
+  font-family: monospace;
+  background: none;
+  border: 1px solid #2076f7;
+  color: #2076f7;
+  padding: 3px 11px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 17px;
+}
+
+.link-btn:hover {
+  background: #edf6ff;
+}
