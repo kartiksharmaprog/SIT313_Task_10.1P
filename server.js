@@ -6,7 +6,6 @@ const postmark = require('postmark');
 
 const app = express();
 // choose a default port that won't conflict with React dev server (3000)
-// use SERVER_PORT for the backend so a root .env PORT won't collide with React
 const PORT = process.env.SERVER_PORT || 5000;
 const client = new postmark.ServerClient(process.env.POSTMARK_API_KEY);
 
@@ -17,7 +16,6 @@ app.use(express.urlencoded({ extended: true }));
 const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000';
 app.use(cors({ origin: corsOrigin }));
 
-// serve static files if needed
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/subscribe', async (req, res) => {
@@ -43,13 +41,13 @@ app.post('/subscribe', async (req, res) => {
     });
 
     console.log('Postmark send result:', result);
+    
     // return Postmark response so client can inspect it if needed
     res.json({ message: 'Email sent successfully!!!', postmark: result });
   } catch (error) {
     console.error("Postmark error:", error);
-    // include error details in response in dev mode
     const msg = error && error.message ? error.message : 'Failed to send email';
-    res.status(500).json({ message: msg, details: error });
+    res.status(500).json({ message: msg });
   }
 });
 

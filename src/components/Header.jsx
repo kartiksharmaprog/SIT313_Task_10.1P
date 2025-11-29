@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Menu, Input, Button } from "semantic-ui-react";
+import { Link } from "react-router-dom";
 import { auth } from "./firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
@@ -37,13 +38,17 @@ function Header() {
         <Input icon="search" placeholder="Search..." />
       </Menu.Item>
       <Menu.Menu position="right">
-        <Menu.Item name="Post" as="a" href="/post" />
+        <Menu.Item name="Home" as={Link} to="/home" />
+        <Menu.Item name="Post" as={Link} to="/post" />
+        <Menu.Item name="Find" as={Link} to="/find" />
+        {/* ADD PLANS MENU ITEM */}
+        <Menu.Item name="Plans" as={Link} to="/plans" />
         {user ? (
           <Menu.Item>
             <Button onClick={handleSignOut} basic>Sign Out</Button>
           </Menu.Item>
         ) : (
-          <Menu.Item name="Login" as="a" href="/login" />
+          <Menu.Item name="Login" as={Link} to="/login" />
         )}
       </Menu.Menu>
     </Menu>

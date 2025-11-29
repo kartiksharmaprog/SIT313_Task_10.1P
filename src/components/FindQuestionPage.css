@@ -1,0 +1,44 @@
+.find-questions-container {
+  padding: 20px;
+}
+
+.find-questions-input {
+  margin-bottom: 10px;
+  width: 300px;
+}
+
+.find-questions-input--small {
+  margin-bottom: 10px;
+  margin-left: 10px;
+  width: 200px;
+}
+
+.find-questions-input--date {
+  margin-bottom: 10px;
+  margin-left: 10px;
+}
+
+.find-questions-card-header {
+  cursor: pointer;
+  position: relative;
+}
+
+.find-questions-card-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.find-questions-image {
+  max-width: 200px;
+  margin-top: 10px;
+}
+
+.find-questions-tags {
+  margin-top: 10px;
+}
+
+.find-questions-tag {
+  margin-right: 5px;
+}

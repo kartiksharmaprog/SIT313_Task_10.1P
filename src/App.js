@@ -8,6 +8,10 @@ import Subscribe from "./components/Subscribe";
 import Footer from "./components/Footer";
 import Login from "./components/Login";
 import SignUp from "./components/SignUp";
+import PostPage from "./components/PostPage";
+import FindQuestionPage from "./components/FindQuestionPage";
+import PricingPlans from "./components/PricingPlans"; 
+import PaymentPage from "./components/PaymentPage"; 
 import "semantic-ui-css/semantic.min.css";
 import "./App.css";
 
@@ -26,7 +30,6 @@ function Home() {
 
   return (
     <div>
-      <Header />
       <Banner />
       <FeaturedArticles articles={articles} />
       <Tutorials tutorials={tutorials} />
@@ -39,11 +42,16 @@ function Home() {
 function App() {
   return (
     <Router>
+      <Header />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/post" element={<PostPage />} />
+        <Route path="/find" element={<FindQuestionPage />} />
+        <Route path="/plans" element={<PricingPlans />} />
+        <Route path="/payment" element={<PaymentPage />} />
       </Routes>
     </Router>
   );
