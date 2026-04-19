@@ -31,16 +31,19 @@ pipeline {
         stage('Security') {
             steps {
                 echo 'Running security scan...'
-                sh 'docker run --rm aquasec/trivy image $IMAGE_NAME || true'
-            }
-        }
+                sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image task10-app || true'
+                    }
+                }
 
         stage('Deploy') {
             steps {
                 echo 'Deploying container...'
-                sh 'docker run -d -p 5000:5000 --env-file .env $IMAGE_NAME'
+                sh '''
+                docker rm -f task10-container || true
+                docker run -d -p 5000:5000 --env-file .env --name task10-container task10-app
+                '''
+                }
             }
-        }
 
         stage('Release') {
             steps {
@@ -51,8 +54,8 @@ pipeline {
 
         stage('Monitoring') {
             steps {
-                echo 'Monitoring stage...'
-                sh 'echo "Monitoring enabled via logs"'
+                echo 'Monitoring application...'
+                sh 'docker ps'
             }
         }
     }
