@@ -22,11 +22,11 @@ pipeline {
 }
 
         stage('Code Quality') {
-            steps {
-                echo 'Code quality check (basic)...'
-                sh 'echo "Code quality stage passed"'
-            }
-        }
+    steps {
+        echo 'Running ESLint analysis...'
+        sh 'docker run --rm task10-app npx eslint . || true'
+    }
+}
 
         stage('Security') {
             steps {
@@ -47,17 +47,23 @@ pipeline {
 }
 
         stage('Release') {
-            steps {
-                echo 'Release stage (tagging)...'
-                sh 'echo "Release completed"'
-            }
-        }
+    steps {
+        echo 'Tagging release...'
+        sh '''
+        docker tag task10-app task10-app:v1.0
+        echo "Release v1.0 created"
+        '''
+    }
+}
 
         stage('Monitoring') {
-            steps {
-                echo 'Monitoring application...'
-                sh 'docker ps'
-            }
-        }
+    steps {
+        echo 'Monitoring application...'
+        sh '''
+        docker ps
+        docker stats --no-stream
+        '''
+    }
+}
     }
 }
