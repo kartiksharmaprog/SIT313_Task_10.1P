@@ -31,19 +31,20 @@ pipeline {
         stage('Security') {
             steps {
                 echo 'Running security scan...'
-                sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image task10-app || true'
-                    }
-                }
+                sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --scanners vuln task10-app || true'
+            }
+        }
 
         stage('Deploy') {
-            steps {
-                echo 'Deploying container...'
-                sh '''
-                docker rm -f task10-container || true
-                docker run -d -p 5000:5000 --env-file .env --name task10-container task10-app
-                '''
-                }
-            }
+    steps {
+        echo 'Deploying container...'
+        sh '''
+        docker ps -q --filter "publish=5000" | xargs -r docker stop
+        docker rm -f task10-container || true
+        docker run -d -p 5000:5000 --env-file .env --name task10-container task10-app
+        '''
+    }
+}
 
         stage('Release') {
             steps {
