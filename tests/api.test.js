@@ -28,4 +28,10 @@ describe('API Tests', () => {
     expect(res.statusCode).toBe(500);
   });
 
+  test('Multiple requests should return consistent results', async () => {
+  const res1 = await request(app).get('/');
+  const res2 = await request(app).get('/');
+  expect(res1.text).toBe(res2.text);
+});
+
 });
