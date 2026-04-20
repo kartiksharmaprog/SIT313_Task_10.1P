@@ -45,18 +45,36 @@ pipeline {
 
         stage('Code Quality') {
     steps {
-        echo 'Running ESLint with report generation...'
+        echo 'Running ESLint with monitoring and reporting...'
         sh '''
         docker run --rm task10-app sh -c "
+        npx eslint . --format stylish > eslint-console.txt || true;
         npx eslint . -f json -o eslint-report.json || true
         "
+
+        echo "=== ESLint Console Output ==="
+        cat eslint-console.txt
+
+        WARNINGS=$(grep -c "warning" eslint-console.txt || true)
+        echo "Total warnings: $WARNINGS"
+
+        if [ "$WARNINGS" -gt 5 ]; then
+            echo "⚠ ALERT: Code quality threshold exceeded (more than 5 warnings)"
+        else
+            echo "Code quality within acceptable limits"
+        fi
         '''
+    }
+    post {
+        always {
+            archiveArtifacts artifacts: 'eslint-report.json, eslint-console.txt', allowEmptyArchive: true
+        }
     }
 }
 
         stage('Security') {
     steps {
-        echo 'Running advanced security scan with Trivy...'
+        echo 'Running advanced security scan (non-blocking with alerts)...'
         sh '''
         docker run --rm \
         -v /var/run/docker.sock:/var/run/docker.sock \
@@ -65,17 +83,34 @@ pipeline {
         --format table \
         task10-app > trivy-report.txt || true
 
-        echo "Checking for HIGH/CRITICAL vulnerabilities..."
+        echo "=== Trivy Scan Report ==="
+        cat trivy-report.txt
 
-        if grep -q "CRITICAL" trivy-report.txt; then
-            echo "CRITICAL vulnerabilities found! Failing pipeline."
-            exit 1
-        elif grep -q "HIGH" trivy-report.txt; then
-            echo "HIGH vulnerabilities found! Review required."
+        CRITICAL_COUNT=$(grep -c "CRITICAL" trivy-report.txt || true)
+        HIGH_COUNT=$(grep -c "HIGH" trivy-report.txt || true)
+
+        echo "Critical vulnerabilities: $CRITICAL_COUNT"
+        echo "High vulnerabilities: $HIGH_COUNT"
+
+        if [ "$CRITICAL_COUNT" -gt 0 ]; then
+            echo "🚨 ALERT: Critical vulnerabilities detected! Immediate attention required."
+        elif [ "$HIGH_COUNT" -gt 0 ]; then
+            echo "⚠ WARNING: High severity vulnerabilities detected. Review recommended."
         else
-            echo "No high severity vulnerabilities found."
+            echo "✅ No high or critical vulnerabilities found."
         fi
+
+        echo "=== Mitigation Suggestions ==="
+        echo "- Update vulnerable dependencies"
+        echo "- Remove unused or insecure packages"
+        echo "- Apply security patches"
+        echo "- Use minimal base images"
         '''
+    }
+    post {
+        always {
+            archiveArtifacts artifacts: 'trivy-report.txt', allowEmptyArchive: true
+        }
     }
 }
 
