@@ -51,8 +51,8 @@ pipeline {
         -v $(pwd):/app \
         -w /app \
         task10-app sh -c "
-        npx --no-install eslint . --format stylish > eslint-console.txt || true
-        npx --no-install eslint . -f json -o eslint-report.json || true
+        ./node_modules/.bin/eslint . --format stylish > eslint-console.txt || true
+        ./node_modules/.bin/eslint . -f json -o eslint-report.json || true
         "
 
         echo "=== ESLint Output ==="
