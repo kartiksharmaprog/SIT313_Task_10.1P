@@ -23,17 +23,39 @@ pipeline {
 
         stage('Code Quality') {
     steps {
-        echo 'Running ESLint analysis...'
-        sh 'docker run --rm task10-app npx eslint . || true'
+        echo 'Running ESLint with report generation...'
+        sh '''
+        docker run --rm task10-app sh -c "
+        npx eslint . -f json -o eslint-report.json || true
+        "
+        '''
     }
 }
 
         stage('Security') {
-            steps {
-                echo 'Running security scan...'
-                sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --scanners vuln task10-app || true'
-            }
-        }
+    steps {
+        echo 'Running advanced security scan with Trivy...'
+        sh '''
+        docker run --rm \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        aquasec/trivy image \
+        --severity HIGH,CRITICAL \
+        --format table \
+        task10-app > trivy-report.txt || true
+
+        echo "Checking for HIGH/CRITICAL vulnerabilities..."
+
+        if grep -q "CRITICAL" trivy-report.txt; then
+            echo "CRITICAL vulnerabilities found! Failing pipeline."
+            exit 1
+        elif grep -q "HIGH" trivy-report.txt; then
+            echo "HIGH vulnerabilities found! Review required."
+        else
+            echo "No high severity vulnerabilities found."
+        fi
+        '''
+    }
+}
 
         stage('Deploy') {
     steps {
@@ -63,10 +85,44 @@ pipeline {
 
         stage('Monitoring') {
     steps {
-        echo 'Monitoring application...'
+        echo 'Running advanced monitoring...'
         sh '''
+        echo "=== Running Containers ==="
         docker ps
+
+        echo "=== Resource Usage ==="
         docker stats --no-stream
+
+        echo "=== Health Check ==="
+        if curl -f http://localhost:5000 > /dev/null 2>&1; then
+            echo "Application is healthy"
+        else
+            echo "ALERT: Application is DOWN!"
+            exit 1
+        fi
+
+        echo "=== Alert Check (CPU Threshold) ==="
+        CPU=$(docker stats --no-stream --format "{{.CPUPerc}}" task10-container | sed 's/%//')
+        CPU_INT=${CPU%.*}
+
+        if [ "$CPU_INT" -gt 80 ]; then
+            echo "ALERT: High CPU usage detected!"
+        else
+            echo "CPU usage normal"
+        fi
+
+        echo "=== Incident Simulation ==="
+        docker stop task10-container
+        sleep 2
+
+        if curl -f http://localhost:5000 > /dev/null 2>&1; then
+            echo "Unexpected: App still running"
+        else
+            echo "Incident detected: Application failure confirmed"
+        fi
+
+        echo "Restarting container after incident..."
+        docker start task10-container
         '''
     }
 }

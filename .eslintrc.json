@@ -15,9 +15,32 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "build/",
+    "dist/",
+    "coverage/"
+  ],
   "rules": {
-    "no-unused-vars": "warn",
-    "no-console": "warn",
-    "semi": ["warn", "always"]
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "semi": ["error", "always"],
+    "eqeqeq": ["error", "always"],
+    "curly": ["error", "all"],
+    "no-var": "error",
+    "prefer-const": "error",
+    "no-duplicate-imports": "error",
+    "no-multiple-empty-lines": ["warn", { "max": 1 }],
+    "max-lines": ["warn", { "max": 300 }],
+    "complexity": ["warn", 10],
+    "max-depth": ["warn", 4],
+    "react/prop-types": "off",
+    "jest/no-disabled-tests": "warn",
+    "jest/no-focused-tests": "error"
   }
 }
