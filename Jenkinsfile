@@ -43,7 +43,7 @@ pipeline {
     }
 }
 
-       stage('Code Quality') {
+      stage('Code Quality') {
     steps {
         echo 'Running ESLint with monitoring and reporting...'
         sh '''
@@ -51,10 +51,8 @@ pipeline {
         -v $(pwd):/reports \
         task10-app sh -c "
         cd /app && \
-        echo 'Running ESLint...' && \
         ./node_modules/.bin/eslint . --format stylish > /reports/eslint-console.txt 2>&1 || true && \
-        ./node_modules/.bin/eslint . -f json -o /reports/eslint-report.json 2>/dev/null || echo '[]' > /reports/eslint-report.json && \
-        ls /reports
+        ./node_modules/.bin/eslint . -f json -o /reports/eslint-report.json 2>/dev/null || echo '[]' > /reports/eslint-report.json
         "
 
         echo "=== ESLint Output ==="
