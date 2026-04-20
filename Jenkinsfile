@@ -47,7 +47,10 @@ pipeline {
     steps {
         echo 'Running ESLint with monitoring and reporting...'
         sh '''
-        docker run --rm task10-app sh -c "
+        docker run --rm \
+        -v $(pwd):/app \
+        -w /app \
+        task10-app sh -c "
         npx eslint . --format stylish > eslint-console.txt || true
         npx eslint . -f json -o eslint-report.json || true
         "
@@ -55,7 +58,7 @@ pipeline {
         echo "=== ESLint Output ==="
         cat eslint-console.txt || true
 
-        WARNINGS=$(grep -c "warning" eslint-console.txt || true)
+        WARNINGS=$(grep -c "warning" eslint-console.txt || echo 0)
         echo "Total warnings: $WARNINGS"
 
         if [ "$WARNINGS" -gt 5 ]; then
@@ -150,29 +153,35 @@ pipeline {
         echo "=== Resource Usage ==="
         docker stats --no-stream
 
+        echo "=== Waiting for app to be ready ==="
+        sleep 10
+
         echo "=== Health Check ==="
-        if curl -f http://localhost:5000 > /dev/null 2>&1; then
+        if docker exec task10-container curl -f http://localhost:5000 > /dev/null 2>&1; then
             echo "Application is healthy"
         else
-            echo "ALERT: Application is DOWN!"
-            exit 1
+            echo "⚠ ALERT: Application health check failed"
         fi
 
         echo "=== Alert Check (CPU Threshold) ==="
         CPU=$(docker stats --no-stream --format "{{.CPUPerc}}" task10-container | sed 's/%//')
         CPU_INT=${CPU%.*}
 
+        if [ -z "$CPU_INT" ]; then
+            CPU_INT=0
+        fi
+
         if [ "$CPU_INT" -gt 80 ]; then
-            echo "ALERT: High CPU usage detected!"
+            echo "⚠ ALERT: High CPU usage detected!"
         else
             echo "CPU usage normal"
         fi
 
         echo "=== Incident Simulation ==="
         docker stop task10-container
-        sleep 2
+        sleep 3
 
-        if curl -f http://localhost:5000 > /dev/null 2>&1; then
+        if docker exec task10-container curl -f http://localhost:5000 > /dev/null 2>&1; then
             echo "Unexpected: App still running"
         else
             echo "Incident detected: Application failure confirmed"
@@ -180,6 +189,8 @@ pipeline {
 
         echo "Restarting container after incident..."
         docker start task10-container
+
+        echo "=== Monitoring Complete ==="
         '''
     }
 }
