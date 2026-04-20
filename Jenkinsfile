@@ -48,20 +48,19 @@ pipeline {
         echo 'Running ESLint with monitoring and reporting...'
         sh '''
         docker run --rm \
-        -v /var/jenkins_home/workspace/devdeakin-pipeline:/reports \
+        -v /var/jenkins_home/workspace/devdeakin-pipeline:/app \
+        -w /app \
         task10-app sh -c "
-        cd /app && \
-        ./node_modules/.bin/eslint . --format stylish > /reports/eslint-console.txt 2>&1 || true && \
-        ./node_modules/.bin/eslint . -f json -o /reports/eslint-report.json 2>/dev/null || echo '[]' > /reports/eslint-report.json
+        echo 'Running ESLint on mounted workspace...' && \
+        ./node_modules/.bin/eslint . --format stylish > eslint-console.txt 2>&1 || true && \
+        ./node_modules/.bin/eslint . -f json -o eslint-report.json 2>/dev/null || echo '[]' > eslint-report.json && \
+        ls -la
         "
 
-        echo "=== DEBUG: List workspace ==="
-        ls -la /var/jenkins_home/workspace/devdeakin-pipeline
-
         echo "=== ESLint Output ==="
-        cat /var/jenkins_home/workspace/devdeakin-pipeline/eslint-console.txt || echo "No ESLint output generated"
+        cat eslint-console.txt || echo "No ESLint output generated"
 
-        WARNINGS=$(grep -c "warning" /var/jenkins_home/workspace/devdeakin-pipeline/eslint-console.txt 2>/dev/null || echo 0)
+        WARNINGS=$(grep -c "warning" eslint-console.txt 2>/dev/null || echo 0)
         echo "Total warnings: $WARNINGS"
 
         if [ "$WARNINGS" -gt 5 ]; then
