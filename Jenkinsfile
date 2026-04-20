@@ -31,7 +31,10 @@ pipeline {
     steps {
         echo 'Running advanced test suite...'
         sh '''
-        docker run --rm task10-app sh -c "
+        docker run --rm \
+        -v $(pwd):/app \
+        -w /app \
+        task10-app sh -c "
         npm test -- --watchAll=false --coverage
         "
         '''
@@ -47,19 +50,22 @@ pipeline {
     steps {
         echo 'Running ESLint with monitoring and reporting...'
         sh '''
-        docker run --rm task10-app sh -c "
-        npx eslint . --format stylish > eslint-console.txt || true;
+        docker run --rm \
+        -v $(pwd):/app \
+        -w /app \
+        task10-app sh -c "
+        npx eslint . --format stylish > eslint-console.txt || true
         npx eslint . -f json -o eslint-report.json || true
         "
 
         echo "=== ESLint Console Output ==="
-        cat eslint-console.txt
+        cat eslint-console.txt || true
 
         WARNINGS=$(grep -c "warning" eslint-console.txt || true)
         echo "Total warnings: $WARNINGS"
 
         if [ "$WARNINGS" -gt 5 ]; then
-            echo "⚠ ALERT: Code quality threshold exceeded (more than 5 warnings)"
+            echo "⚠ ALERT: Code quality threshold exceeded"
         else
             echo "Code quality within acceptable limits"
         fi
