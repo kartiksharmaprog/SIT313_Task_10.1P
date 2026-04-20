@@ -33,7 +33,7 @@ pipeline {
         sh '''
         docker run --rm \
         -v $(pwd):/app \
-        -w /app \
+        -w /app/task10.1p \
         task10-app sh -c "
         npm test -- --watchAll=false --coverage
         "
@@ -41,7 +41,7 @@ pipeline {
     }
     post {
         always {
-            archiveArtifacts artifacts: 'coverage/**', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'task10.1p/coverage/**', allowEmptyArchive: true
         }
     }
 }
@@ -52,16 +52,16 @@ pipeline {
         sh '''
         docker run --rm \
         -v $(pwd):/app \
-        -w /app \
+        -w /app/task10.1p \
         task10-app sh -c "
         npx eslint . --format stylish > eslint-console.txt || true
         npx eslint . -f json -o eslint-report.json || true
         "
 
         echo "=== ESLint Console Output ==="
-        cat eslint-console.txt || true
+        cat task10.1p/eslint-console.txt || true
 
-        WARNINGS=$(grep -c "warning" eslint-console.txt || true)
+        WARNINGS=$(grep -c "warning" task10.1p/eslint-console.txt || true)
         echo "Total warnings: $WARNINGS"
 
         if [ "$WARNINGS" -gt 5 ]; then
@@ -73,7 +73,7 @@ pipeline {
     }
     post {
         always {
-            archiveArtifacts artifacts: 'eslint-report.json, eslint-console.txt', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'task10.1p/eslint-report.json, task10.1p/eslint-console.txt', allowEmptyArchive: true
         }
     }
 }
