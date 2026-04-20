@@ -8,17 +8,39 @@ pipeline {
     stages {
 
         stage('Build') {
-            steps {
-                echo 'Building Docker image...'
-                sh 'docker build -t $IMAGE_NAME .'
-            }
-        }
+    steps {
+        echo 'Building Docker image with versioning...'
+        sh '''
+        VERSION=1.0.${BUILD_NUMBER}
+        echo "Building version: $VERSION"
+
+        docker build -t task10-app:$VERSION .
+        docker tag task10-app:$VERSION task10-app:latest
+
+        echo $VERSION > version.txt
+        '''
+    }
+    post {
+    always {
+        archiveArtifacts artifacts: 'version.txt', allowEmptyArchive: true
+    }
+}
+}
 
         stage('Test') {
-            steps {
-                echo 'Running tests inside container...'
-                sh 'docker run --rm task10-app npm test'
-            }
+    steps {
+        echo 'Running advanced test suite...'
+        sh '''
+        docker run --rm task10-app sh -c "
+        npm test -- --watchAll=false --coverage
+        "
+        '''
+    }
+    post {
+        always {
+            archiveArtifacts artifacts: 'coverage/**', allowEmptyArchive: true
+        }
+    }
 }
 
         stage('Code Quality') {
