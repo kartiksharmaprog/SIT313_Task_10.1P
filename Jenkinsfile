@@ -47,20 +47,16 @@ pipeline {
     steps {
         echo 'Running ESLint with monitoring and reporting...'
         sh '''
-        docker run --rm \
+        echo "=== Running ESLint ==="
+
+        OUTPUT=$(docker run --rm \
         -v /var/jenkins_home/workspace/devdeakin-pipeline:/app \
         -w /app \
-        task10-app sh -c "
-        echo 'Running ESLint on mounted workspace...' && \
-        ./node_modules/.bin/eslint . --format stylish > eslint-console.txt 2>&1 || true && \
-        ./node_modules/.bin/eslint . -f json -o eslint-report.json 2>/dev/null || echo '[]' > eslint-report.json && \
-        ls -la
-        "
+        task10-app sh -c "./node_modules/.bin/eslint . --format stylish" || true)
 
-        echo "=== ESLint Output ==="
-        cat eslint-console.txt || echo "No ESLint output generated"
+        echo "$OUTPUT"
 
-        WARNINGS=$(grep -c "warning" eslint-console.txt 2>/dev/null || echo 0)
+        WARNINGS=$(echo "$OUTPUT" | grep -c "warning" || echo 0)
         echo "Total warnings: $WARNINGS"
 
         if [ "$WARNINGS" -gt 5 ]; then
@@ -69,11 +65,6 @@ pipeline {
             echo "Code quality within acceptable limits"
         fi
         '''
-    }
-    post {
-        always {
-            archiveArtifacts artifacts: 'eslint-report.json, eslint-console.txt', allowEmptyArchive: true
-        }
     }
 }
 
