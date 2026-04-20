@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # 🔥 Install ALL dependencies including devDependencies
-RUN npm install --legacy-peer-deps
+RUN npm install --legacy-peer-deps --include=dev
 
 COPY . .
 
