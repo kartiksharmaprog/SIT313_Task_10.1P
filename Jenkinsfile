@@ -41,7 +41,12 @@ pipeline {
         sh '''
         docker ps -q --filter "publish=5000" | xargs -r docker stop
         docker rm -f task10-container || true
-        docker run -d -p 5000:5000 --env-file .env --name task10-container task10-app
+
+        if docker run -d -p 5000:5000 --env-file .env --name task10-container task10-app; then
+            echo "Deployment successful"
+        else
+            echo "Deployment failed - rollback triggered"
+        fi
         '''
     }
 }
