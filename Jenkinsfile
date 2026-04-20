@@ -31,17 +31,14 @@ pipeline {
     steps {
         echo 'Running advanced test suite...'
         sh '''
-        docker run --rm \
-        -v $(pwd):/app \
-        -w /app/task10.1p \
-        task10-app sh -c "
+        docker run --rm task10-app sh -c "
         npm test -- --watchAll=false --coverage
         "
         '''
     }
     post {
         always {
-            archiveArtifacts artifacts: 'task10.1p/coverage/**', allowEmptyArchive: true
+            echo "Test stage completed"
         }
     }
 }
