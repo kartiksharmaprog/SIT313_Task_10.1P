@@ -43,22 +43,25 @@ pipeline {
     }
 }
 
-      stage('Code Quality') {
+     stage('Code Quality') {
     steps {
         echo 'Running ESLint with monitoring and reporting...'
         sh '''
         docker run --rm \
-        -v $(pwd):/reports \
+        -v /var/jenkins_home/workspace/devdeakin-pipeline:/reports \
         task10-app sh -c "
         cd /app && \
         ./node_modules/.bin/eslint . --format stylish > /reports/eslint-console.txt 2>&1 || true && \
         ./node_modules/.bin/eslint . -f json -o /reports/eslint-report.json 2>/dev/null || echo '[]' > /reports/eslint-report.json
         "
 
-        echo "=== ESLint Output ==="
-        cat eslint-console.txt || echo "No ESLint output generated"
+        echo "=== DEBUG: List workspace ==="
+        ls -la /var/jenkins_home/workspace/devdeakin-pipeline
 
-        WARNINGS=$(grep -c "warning" eslint-console.txt 2>/dev/null || echo 0)
+        echo "=== ESLint Output ==="
+        cat /var/jenkins_home/workspace/devdeakin-pipeline/eslint-console.txt || echo "No ESLint output generated"
+
+        WARNINGS=$(grep -c "warning" /var/jenkins_home/workspace/devdeakin-pipeline/eslint-console.txt 2>/dev/null || echo 0)
         echo "Total warnings: $WARNINGS"
 
         if [ "$WARNINGS" -gt 5 ]; then
