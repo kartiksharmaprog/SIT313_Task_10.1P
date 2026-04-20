@@ -48,11 +48,11 @@ pipeline {
         echo 'Running ESLint with monitoring and reporting...'
         sh '''
         docker run --rm \
-        -v $(pwd):/app \
-        -w /app \
+        -v $(pwd):/reports \
         task10-app sh -c "
-        ./node_modules/.bin/eslint . --format stylish > eslint-console.txt || true
-        ./node_modules/.bin/eslint . -f json -o eslint-report.json || true
+        cd /app && \
+        ./node_modules/.bin/eslint . --format stylish > /reports/eslint-console.txt || true && \
+        ./node_modules/.bin/eslint . -f json -o /reports/eslint-report.json || true
         "
 
         echo "=== ESLint Output ==="
