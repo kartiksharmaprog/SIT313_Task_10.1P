@@ -43,16 +43,15 @@ pipeline {
     }
 }
 
-     stage('Code Quality') {
+    stage('Code Quality') {
     steps {
         echo 'Running ESLint with monitoring and reporting...'
         sh '''
-        echo "=== Running ESLint ==="
+        echo "=== Running ESLint inside container ==="
 
-        OUTPUT=$(docker run --rm \
-        -v /var/jenkins_home/workspace/devdeakin-pipeline:/app \
-        -w /app \
-        task10-app sh -c "./node_modules/.bin/eslint . --format stylish" || true)
+        OUTPUT=$(docker run --rm task10-app sh -c "
+        cd /app && ./node_modules/.bin/eslint . --format stylish
+        " || true)
 
         echo "$OUTPUT"
 
